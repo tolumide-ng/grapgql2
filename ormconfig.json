@@ -1,0 +1,55 @@
+[
+   {
+   "name": "development",
+   "type": "postgres",
+   "host": "localhost",
+   "port": 5432,
+   "username": "tolumide",
+   "password": "",
+   "database": "gq_ts",
+   "synchronize": true,
+   "logging": true ,
+   "uuidExtension": true,
+   "entities": [
+      "src/entity/**/*.ts"
+   ],
+   "migrations": [
+      "src/migration/**/*.ts"
+   ],
+   "subscribers": [
+      "src/subscriber/**/*.ts"
+   ],
+   "cli": {
+      "entitiesDir": "src/entity",
+      "migrationsDir": "src/migration",
+      "subscribersDir": "src/subscriber"
+   }
+},
+{
+   "name": "test",
+   "type": "postgres",
+   "host": "localhost",
+   "port": 5432,
+   "uuidExtension": true,
+   "username": "tolumide",
+   "dropSchema": true,
+   "password": "",
+   "database": "gq_ts_test",
+   "synchronize": true,
+   "logging": false ,
+   "entities": [
+      "src/entity/**/*.ts"
+   ],
+   "migrations": [
+      "src/migration/**/*.ts"
+   ],
+   "subscribers": [
+      "src/subscriber/**/*.ts"
+   ],
+   "cli": {
+      "entitiesDir": "src/entity",
+      "migrationsDir": "src/migration",
+      "subscribersDir": "src/subscriber"
+   }
+}
+]
