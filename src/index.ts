@@ -1,30 +1,59 @@
 import "reflect-metadata";
 import { GraphQLServer } from 'graphql-yoga'
-import {GraphQLSchema} from 'graphql'
 import {createTypeormConn} from './utils/createTypeormConn';
-import {makeExecutableSchema, mergeSchemas} from 'graphql-tools'
-import * as path from 'path';
-import * as fs from 'fs'
+// import * as session from 'express-session'
+// import redis from 'redis'
+// const session = require('express-session')
+import dotenv from 'dotenv'
+import Redis from 'ioredis'
+import { User } from "./entity/User";
+import {genSchema} from './utils/genSchema'
 
 
-// IMPORTANT! => PLEASE REMEMBER TO INSTALL PSQL EXTENSION ON CI (TRAVIS/CIRCLECI) WHEN ACTIAVTED WITH =>
+dotenv.config()
+
+
+// let RedisStore = require('connect-redis')(session);
+// let client = redis.createClient()
+
+// INSTALL PSQL EXTENSION ON CI (TRAVIS/CIRCLECI) WHEN ACTIAVTED WITH =>
 // CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 export const startServer = async () => {
 
-    const schemas: GraphQLSchema[] = [];
-    const folders = fs.readdirSync(path.join(__dirname, './modules'));
-    folders.forEach(folder => {
-        const {resolvers} = require(`./modules/${folder}/resolvers`);
-        let typeDefs = path.join(__dirname, `./modules/${folder}/schema.graphql`);
-        typeDefs = fs.readFileSync(typeDefs, 'utf-8')
 
-        schemas.push(makeExecutableSchema({resolvers, typeDefs}))
+    const redis = new Redis()
+
+    const server = new GraphQLServer({schema: genSchema(), context: ({request}) => ({redis, url: `${request.protocol}://${request.get('host')}`, // session: request.session
+    })})
+
+    server.express.get('/confirm/:id', async (req, res): Promise<void> => {
+        const { id } = req.params;
+        const userId: any = await redis.get(id);
+        if(userId){
+            await User.update({ id: userId }, {confirmed: true});
+            redis.del(id)
+            res.send('ok')
+        } else {
+            res.send('Invalid')
+        }
     });
 
-    const server = new GraphQLServer({schema: mergeSchemas({schemas})})
-
+    // server.express.use(
+    //     session({
+    //         store: new RedisStore({client}),
+    //         name: 'quid',
+    //         secret: process.env.SECRET,
+    //         resave: false,
+    //         saveUninitialized: false,
+    //         cookie: {
+    //             httpOnly: true,
+    //             secure: process.env.NODE_ENV === 'production',
+    //             maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+    //         }
+    //     })
+    // )
 
 
 
