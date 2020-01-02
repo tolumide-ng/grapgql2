@@ -2,7 +2,7 @@
 const nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
-export const generateMail = async (args: {email: string, htmlBody: string}) => {
+export const generateMail = async (args: {email: string, htmlBody: string, emailSender: string}) => {
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   let testAccount = await nodemailer.createTestAccount();
@@ -19,9 +19,9 @@ export const generateMail = async (args: {email: string, htmlBody: string}) => {
   });
 
   // send mail with defined transport object
-  const {email, htmlBody} = args;
+  const {email, htmlBody, emailSender} = args;
   let info = await transporter.sendMail({
-    from: '"Brown 👻" <donotreplyBrown@crowdy.com>', // sender address
+    from: `${emailSender}`, // sender address
     to: `${email}`, // list of receivers
     subject: "Email Confirmation Link", // Subject line
     // text: "Hello world?", // plain text body

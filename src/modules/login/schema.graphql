@@ -1,12 +1,15 @@
-type Error {
-    path: String!,
+type LoginError {
+    status: String!,
     message: String!
 }
 
-type Query {
-    bye2: String!
+type LoginSuccess {
+    status: String!,
+    token: String!
 }
 
-type Mutation {
-    login(email: String!, password: String!): [Error!]
+union LoginResponse = LoginError | LoginSuccess
+
+type Query {
+    login(email: String!, password: String!): LoginResponse
 }

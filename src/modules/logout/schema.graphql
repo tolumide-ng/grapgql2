@@ -1,0 +1,9 @@
+type LogoutResponse {
+    status: String!,
+    message: String!
+}
+
+
+type Query {
+    logOut(token: String!): LogoutResponse!
+}

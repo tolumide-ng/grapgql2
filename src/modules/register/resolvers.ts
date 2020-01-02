@@ -2,7 +2,7 @@ import {ResolverMap} from '../../types/graphql-utils'
 import {User,} from '../../entity/User';
 import * as yup from 'yup';
 import { formatYupError } from '../../utils/formatYupError';
-import { createConfirmEmailLink } from '../../utils/createConfirmEmailLink';
+import { createConfirmEmailLink } from '../../utils/createEmail';
 import {generateMail} from '../../utils/nodeMailer'
 import {secondResponse} from '../../utils/basicUtils'
 
@@ -13,10 +13,6 @@ const schema = yup.object().shape({
 
 
 export const resolvers: ResolverMap = {
-    // Query: {
-    //     bye: () => 'Bye'
-    // },
-
     Mutation: {
         register: async (_:any, args, context): Promise<any> => {
             try{
@@ -40,7 +36,7 @@ export const resolvers: ResolverMap = {
             const link = await createConfirmEmailLink(url, user.id, redis);
             // I will be providing a link to the frontend with the id attached as a req.params for the frontend to send as argument in a real-life scenario
             const htmlBody = `<p>Thank you for chosing to do business with us, Here is your confirmation email link ${link}</p>`
-            await generateMail({email, htmlBody});
+            await generateMail({email, htmlBody, emailSender: '"Brown 👻" <donotreplyBrown@crowdy.com>'});
             return {
                 __typename: "RegisterSuccess",
                 ...secondResponse('success', 'Please check your email for your confirmation link')
