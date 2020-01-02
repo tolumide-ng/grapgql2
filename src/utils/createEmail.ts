@@ -11,7 +11,7 @@ export const createConfirmEmailLink = async (url: string, userId: string, redis:
 
 export const forgotPasswordEmailLink = async (url: string, userId: string, redis: Redis) => {
     const id = v4();
-    // Forgot password expires in 2 hrs
-    await redis.set(`${id}-forgot`, userId, 'ex', 1000 * 60 * 60 * 2);
+    // Forgot password expires in 20 minutes
+    await redis.set(`${id}-forgot`, userId, 'ex', 1000 * 60 * 20 * 1);
     return `${url}/confirm/${id}`
 }

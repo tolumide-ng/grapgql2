@@ -1,4 +1,4 @@
-import "reflect-metadata";
+// import "reflect-metadata";
 import { GraphQLServer } from 'graphql-yoga'
 import {createTypeormConn} from './utils/createTypeormConn';
 // import * as session from 'express-session'

@@ -23,8 +23,11 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
     async hashPassword(){
-        this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
+        if(this.password){
+            this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
+        }
     }
+
 
     // @BeforeInsert()
     // addId(){
