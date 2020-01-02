@@ -1,0 +1,9 @@
+type ForgotPasswordResponse {
+    status: String!
+    message: String!
+}
+
+
+type Query {
+    forgotPassword(email: String!): ForgotPasswordResponse!
+}

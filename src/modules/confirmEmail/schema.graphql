@@ -4,5 +4,5 @@ type emailConfirmResponse {
 }
 
 type Query {
-    confirmEmail(id: String!): [emailConfirmResponse]
+    confirmEmail(id: String!): emailConfirmResponse
 }

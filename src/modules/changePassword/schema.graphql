@@ -1,0 +1,9 @@
+type ChangePasswordResponse {
+    status: String!,
+    message: String!
+}
+
+
+type Mutation {
+    changePassword(passwordResetLink: String!, password: String!): ChangePasswordResponse!
+}

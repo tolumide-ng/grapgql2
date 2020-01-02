@@ -7,7 +7,7 @@
    "username": "tolumide",
    "password": "",
    "database": "gq_ts",
-   "dropSchema": true,
+   "dropSchema": false,
    "synchronize": true,
    "logging": true ,
    "uuidExtension": true,

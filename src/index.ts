@@ -25,7 +25,8 @@ export const startServer = async () => {
 
     const redis = new Redis()
 
-    const server = new GraphQLServer({schema: genSchema(), context: ({request}) => ({redis, url: `${request.protocol}://${request.get('host')}`, // session: request.session
+    const server = new GraphQLServer({schema: genSchema(), context: ({request}) => ({redis, url: `${request.protocol}://${request.get('host')}`, // session: request.session,
+    // url: process.env.FRONTEND_URL
     })})
 
     server.express.get('/confirm/:id', async (req, res): Promise<void> => {
