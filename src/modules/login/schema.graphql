@@ -1,0 +1,12 @@
+type Error {
+    path: String!,
+    message: String!
+}
+
+type Query {
+    bye2: String!
+}
+
+type Mutation {
+    login(email: String!, password: String!): [Error!]
+}

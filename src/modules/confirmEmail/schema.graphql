@@ -1,0 +1,8 @@
+type emailConfirmResponse {
+    status: String!,
+    message: String!
+}
+
+type Query {
+    confirmEmail(id: String!): [emailConfirmResponse]
+}

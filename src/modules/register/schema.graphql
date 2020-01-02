@@ -1,10 +1,19 @@
-type Error {
+type RegisterError {
     path: String!,
     message: String!
 }
 
+
+type RegisterSuccess {
+    status: String!,
+    message: String
+}
+
+
+union RegisterResponse = RegisterSuccess | RegisterError
+
 type Mutation {
-    register(email: String!, password: String!): [Error! ]
+    register(email: String!, password: String!): RegisterResponse
 }
 
 type Query {
