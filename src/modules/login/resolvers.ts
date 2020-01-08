@@ -1,21 +1,23 @@
 import {ResolverMap} from '../../types/graphql-utils'
-import { User } from '../../entity/User'
+import User from '../../database/models/User'
 import { invalidLogin, confirmEmailMessage } from './messages'
 import bcrypt from 'bcryptjs'
 import {signJwt, loginResponse, secondResponse} from '../../utils/basicUtils'
+import Baserepository from '../../Baserepository/base.repository'
 
 
 export const resolvers: ResolverMap = {
     Query: {
         login: async (_, {email, password}, {redis}) => {
-            const user = await User.findOne({where: { email }});
-            if(!user){
+            const user = await Baserepository.findBy(User, ['id', 'password', 'email', 'confirmed'], ['email', email])
+            if(!user[0].id){
                 return {
                     __typename: 'LoginError',
                     ...secondResponse('Error', invalidLogin)
                 }
             }
-            const valid = await bcrypt.compare(password, user.password);
+
+            const valid = await bcrypt.compare(password, user[0].password);
             if(!valid){
                 return {
                     __typename: 'LoginError',
@@ -23,28 +25,28 @@ export const resolvers: ResolverMap = {
                 }
             }
 
-            if(!user.confirmed){
+            if(!user[0].confirmed){
                 return {
                     __typename: 'LoginError',
                     ...secondResponse('Error', confirmEmailMessage)
                 }
             }
 
-            const token = signJwt({id: user.id, email: user.email});
+            const token = signJwt({id: user[0].id, email: user[0].email});
 
             let now  = Date.now();
             now += 1000 * 60 * 60 * 24
 
 
 
-            await redis.zadd(`${user.id}-tokens`, `${now}`, token)
+            await redis.zadd(`${user[0].id}-tokens`, `${now}`, token)
 
 
-            const expiredTokens = await redis.zrangebyscore(`${user.id}-tokens`, `-inf`, Date.now());
+            const expiredTokens = await redis.zrangebyscore(`${user[0].id}-tokens`, `-inf`, Date.now());
 
             // Remove expired tokens on user login
-            expiredTokens.length > 1 && expiredTokens.forEach( async token => {
-                await redis.zrem(`${user.id}-tokens`, token)
+            expiredTokens.length >= 1 && expiredTokens.forEach( async token => {
+                await redis.zrem(`${user[0].id}-tokens`, token)
             });
 
 

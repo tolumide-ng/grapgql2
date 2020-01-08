@@ -8,6 +8,7 @@ export const resolvers: ResolverMap = {
             const validateToken = await verifyToken(token)
             if(validateToken){
                 const allTokens = await redis.zrangebyscore(`${validateToken.data.id}-tokens`, `-inf`, `+inf`);
+
                 if (allTokens.includes(token)){
                     await redis.zrem(`${validateToken.data.id}-tokens`, token);
                     return secondResponse('Success', 'Logout Successfull')

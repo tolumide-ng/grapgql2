@@ -1,0 +1,24 @@
+type ProfileDetails {
+    status: String!,
+    name: String!,
+    zodiacSign: String!
+    email: String!
+    phone: String!
+    location: String!
+    interests: String!
+    relationshipStatus: String!
+    age: Int!
+}
+
+
+type Mutation {
+    createProfile(status: String!,
+    name: String!,
+    zodiacSign: String!
+    email: String!
+    phone: String!
+    location: String!
+    interests: String!
+    relationshipStatus: String!
+    age: Int!): ProfileDetails
+}
