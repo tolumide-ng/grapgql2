@@ -3,6 +3,10 @@ type ChangePasswordResponse {
     message: String!
 }
 
+type Query {
+    changePwd: String!
+}
+
 
 type Mutation {
     changePassword(passwordResetLink: String!, password: String!): ChangePasswordResponse!

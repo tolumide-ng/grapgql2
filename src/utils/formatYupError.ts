@@ -8,5 +8,6 @@ export const formatYupError = (err: ValidationError) => {
             message: err.message
         })
     });
-    return errors
+    // console.log('the errors>>>>>>>>>', errors)
+    return {__typename: "RegisterError", ...errors[0]}
 }
