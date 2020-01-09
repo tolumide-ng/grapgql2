@@ -22,11 +22,9 @@ export const resolvers: ResolverMap = {
             }catch(err){
                 return formatYupError(err)
             }
-            console.log('I have been called')
             const {email, password} = args
             // const emailAlreadyExist = await User.findOne({where: {email}, select: ['id']});
             const emailAlreadyExist = await Baserepository.findBy(User, ['id'], ['email', `${email}`])
-            console.log('this is the response from the db find>>>>>>', emailAlreadyExist);
 
             if(emailAlreadyExist.length){
                 return {
@@ -37,7 +35,6 @@ export const resolvers: ResolverMap = {
             }
 
         const user = await Baserepository.create(User, {email, password})
-        console.log('the user,', user.id)
             const {redis, url} = context;
             const link = await createConfirmEmailLink(url, user.id, redis);
             // I will be providing a link to the frontend with the id attached as a req.params for the frontend to send as argument in a real-life scenario

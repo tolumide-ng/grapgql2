@@ -10,7 +10,7 @@ export const resolvers: ResolverMap = {
     Query: {
         login: async (_, {email, password}, {redis}) => {
             const user = await Baserepository.findBy(User, ['id', 'password', 'email', 'confirmed'], ['email', email])
-            if(!user[0].id){
+            if(!user[0]){
                 return {
                     __typename: 'LoginError',
                     ...secondResponse('Error', invalidLogin)

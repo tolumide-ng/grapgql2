@@ -1,21 +1,17 @@
 import * as fs from 'fs'
-import {createTypeormConn} from '../../utils/createTypeormConn'
 import {makeExecutableSchema} from 'graphql-tools'
 import {graphql} from 'graphql'
-import {User} from '../../entity/User'
+import User from '../../database/models/User'
 import * as faker from 'faker'
 import * as path from 'path'
 import { resolvers } from './resolvers'
 
-import { Redis } from '../../../tests/test.utils'
+import { Redis, genUser } from '../../../tests/test.utils'
+import databaseConnection from '../..'
+import Baserepository from '../../Baserepository/base.repository'
 
-let connection: any;
 const redis = new Redis()
 
-const genUser = () => ({
-    email: faker.internet.email(),
-    password: faker.internet.password()
-})
 const genToken: string = faker.random.uuid()
 const PASSWORD = 'newPassword2020#'
 
@@ -31,31 +27,37 @@ mutation {
 
 describe('Test Change Password', () => {
     beforeAll(async () => {
-        connection = await createTypeormConn();
+        await databaseConnection.migrate.latest()
+        await databaseConnection('users').truncate()
     })
 
     beforeEach(async () => {
-        const all = await User.find();
-        await connection.synchronize()
-        await User.remove(all)
+        await databaseConnection('users').truncate()
     })
 
     afterAll(async () => {
-        await connection.close();
+        await databaseConnection('users').truncate()
+        await databaseConnection.destroy()
+
     })
 
 
-    test('should successfully change a password', async () => {
-        const { email, password } = genUser();
 
-        const user = User.create({email, password, confirmed: true})
-        await user.save()
+    test('should successfully change a password', async () => {
+        const { email, password } = genUser()
+
+        // const user = User.create({email, password, confirmed: true})
+        // await user.save()
+        const user = await Baserepository.create(User, {email, password, confirmed: true})
         redis.set(`${user.id}`)
 
-        const previousUser = await User.find({where: {email}})
+        // const previousUser = await User.find({where: {email}})
+        const previousUser = await Baserepository.findBy(User, ['id'], ['email', email])
+
         expect(previousUser.length).toEqual(1);
 
         const response: any = await graphql({schema, source: requestChangePassword(`${user.id}`, PASSWORD), contextValue: {redis}});
+
         expect(response.data.changePassword.status).toEqual('Success');
         expect(response.data.changePassword.message).toEqual('Password reset Successfull');
     })

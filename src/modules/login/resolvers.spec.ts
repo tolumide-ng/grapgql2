@@ -1,16 +1,17 @@
 import * as fs from 'fs'
-import {createTypeormConn} from '../../utils/createTypeormConn'
 import {makeExecutableSchema} from 'graphql-tools'
 import {graphql} from 'graphql'
-import {User} from '../../entity/User'
+import User from '../../database/models/User'
 import * as faker from 'faker'
 import * as path from 'path'
 import { resolvers } from './resolvers'
 // import bcrypt from 'bcryptjs'
 import {invalidLogin, confirmEmailMessage, errorStatus, successStatus} from './messages'
 import { Redis } from '../../../tests/test.utils'
+import databaseConnection from '../..'
+import Baserepository from '../../Baserepository/base.repository'
 
-let connection: any;
+
 const redis = new Redis()
 
 const genUser = () => ({
@@ -37,19 +38,20 @@ query {
 
 describe('Test User Login', () => {
     beforeAll(async () => {
-        connection = await createTypeormConn();
-        await connection.synchronize()
+        await databaseConnection.migrate.latest()
+        await databaseConnection('users').truncate()
 
     });
 
     beforeEach(async() => {
-        const all = await User.find();
-        await User.remove(all)
+        await databaseConnection('users').truncate()
     })
 
 
     afterAll(async() => {
-        await connection.close();
+        await databaseConnection('users').truncate()
+        await databaseConnection.destroy()
+
     })
 
 
@@ -57,16 +59,15 @@ describe('Test User Login', () => {
     const schema = makeExecutableSchema({typeDefs, resolvers})
 
 
-    test('should successfully login an existing user', async () => {
+    test('should successfully login an existing and confirmed user', async () => {
         const {email, password} = genUser()
 
+        await Baserepository.create(User, {email, password})
 
-        const user = User.create({email, password, confirmed: true})
-        await user.save()
+        const previousUser = await Baserepository.findBy(User, ['id'], ['email', email])
+        await Baserepository.updateById(User, previousUser[0].id, {confirmed: true})
 
-        const previousUser = await User.find({where: { email}})
         expect(previousUser.length).toEqual(1)
-
 
         const response: any = await graphql({schema, source: loginMutation(email, password), contextValue: {redis}});
 
@@ -74,18 +75,19 @@ describe('Test User Login', () => {
         expect(response.data.login.token).toBeTruthy()
     })
 
-    test.skip('should fail login if the password is incorrect', async () => {
+    test('should fail login if the password is incorrect', async () => {
         const {email, password} = genUser();
 
-        const user = User.create({email, password, confirmed: true})
-        await user.save()
+        await Baserepository.create(User, {email, password})
 
-        const previousUser = await User.find({where: { email}})
+        const previousUser = await Baserepository.findBy(User, ['id'], ['email', email])
+
         expect(previousUser.length).toEqual(1)
 
 
         const response: any = await graphql({schema, source: loginMutation(email, 'fakePassword'), contextValue: {redis}});
-        console.log('((((((response))))', response)
+
+
         expect(response.data.login.errorStatus).toEqual(errorStatus)
         expect(response.data.login.message).toEqual(invalidLogin)
     })
@@ -94,6 +96,8 @@ describe('Test User Login', () => {
         const {email} = genUser();
 
         const response: any = await graphql({schema, source: loginMutation(email, 'fakePassword'), contextValue: {redis}});
+
+
         expect(response.data.login.errorStatus).toEqual(errorStatus)
         expect(response.data.login.message).toEqual(invalidLogin)
     })
@@ -103,11 +107,17 @@ describe('Test User Login', () => {
         const {email, password} = genUser()
 
 
-        const user = User.create({email, password})
-        await user.save()
+        // const user = User.create({email, password})
+        // await user.save()
+        await Baserepository.create(User, {email, password})
 
-        const previousUser = await User.find({where: { email}})
-        expect(previousUser.length).toEqual(1)
+        // const previousUser = await User.find({where: { email}})
+        const previousUser = await Baserepository.findBy(User, ['id', 'email'], ['email', email])
+        console.log('the previous userUSERRRRR>>>>>>>>>', previousUser)
+        console.log('TYPE OF USER>>>>>>>', typeof(previousUser))
+        expect(Object.keys(previousUser).length).toEqual(1)
+
+
 
 
         const response: any = await graphql({schema, source: loginMutation(email, password), contextValue: {redis}});

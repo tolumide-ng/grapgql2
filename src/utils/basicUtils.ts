@@ -47,3 +47,7 @@ export const verifyToken = (token: string): any => {
     })
     return result;
 };
+
+export const zodiacs = [ 'Aries', 'Leo', 'Cancer', 'Pisces', 'Scorpio', 'Taurus', 'Sagittarius', 'Gemini', 'Virgo', 'Libra', 'Capricon', 'Aquarius']
+
+export const relationship = ['single', 'married', 'divorced']

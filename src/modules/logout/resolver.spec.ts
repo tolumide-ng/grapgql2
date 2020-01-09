@@ -7,12 +7,11 @@ import * as path from 'path'
 
 // the actual resolvers
 import { resolvers } from './resolvers'
+
 import { signJwt } from '../../utils/basicUtils'
-import { createTypeormConn } from '../../utils/createTypeormConn'
-import { User } from '../../entity/User'
+import databaseConnection from '../..'
 
 
-let connection: any;
 const email: () => string = () => faker.internet.email()
 const id = faker.random.uuid()
 const redis = new Redis()
@@ -28,19 +27,21 @@ query {
 }
 `
 
-describe.skip('Test User Logout', () => {
+describe('Test User Logout', () => {
     beforeAll(async () => {
-        connection = await createTypeormConn()
+        await databaseConnection.migrate.latest()
+        await databaseConnection('users').truncate()
     });
 
     beforeEach(async () => {
-        const all = await User.find()
-        await User.remove(all)
+        await databaseConnection('users').truncate()
         jest.clearAllMocks()
     });
 
     afterAll(async () => {
-        await connection.close();
+        await databaseConnection('users').truncate()
+        await databaseConnection.destroy()
+
     });
 
 

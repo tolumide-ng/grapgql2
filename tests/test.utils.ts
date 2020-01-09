@@ -1,3 +1,4 @@
+import faker from 'faker'
 
 export class Redis {
 
@@ -31,3 +32,9 @@ export class Redis {
     }
 
 }
+
+
+export const genUser = () => ({
+    email: faker.internet.email(),
+    password: faker.internet.password()
+})

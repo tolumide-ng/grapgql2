@@ -21,7 +21,7 @@ class Baserepository {
     }
 
     static async findBy (model: any, select: string[], where: string[]) {
-        return await model.query().select(...select).where(...where).debug()
+        return await model.query().select(...select).where(...where)
     }
 
 }

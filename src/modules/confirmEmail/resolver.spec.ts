@@ -1,21 +1,17 @@
 import * as fs from 'fs'
 import {makeExecutableSchema} from 'graphql-tools'
-import {Redis} from '../../../tests/test.utils'
+import {Redis, genUser} from '../../../tests/test.utils'
 import {graphql} from 'graphql'
 import * as faker from 'faker'
 import * as path from 'path'
 
 // the actual resolvers
 import { resolvers } from './resolvers'
-import { createTypeormConn } from '../../utils/createTypeormConn'
-import { User } from '../../entity/User'
+import User from '../../database/models/User'
+import databaseConnection from '../..'
+import Baserepository from '../../Baserepository/base.repository'
 
 
-let connection: any;
-const genUser: () => {email: string, password: string} = () => ({
-    email: faker.internet.email(),
-    password: faker.internet.password()
-})
 const id = () => faker.random.uuid()
 const redis = new Redis()
 
@@ -32,19 +28,19 @@ query {
 
 describe.only('Test Confirm Email', () => {
     beforeAll(async () => {
-        connection = await createTypeormConn();
-
+        await databaseConnection.migrate.latest()
+        await databaseConnection('users').truncate()
     });
 
     beforeEach(async() => {
-        const all = await User.find();
-        await User.remove(all)
-        await connection.synchronize()
+        await databaseConnection('users').truncate()
         redis.del()
     })
 
     afterAll(async () => {
-        await connection.close();
+        await databaseConnection('users').truncate()
+        await databaseConnection.destroy()
+
     })
 
 
@@ -54,14 +50,15 @@ describe.only('Test Confirm Email', () => {
     test('should confirm a valid token', async () => {
         const { email, password } = genUser()
 
-        const user = await User.create({email, password});
-        await user.save();
+        await Baserepository.create(User, {email, password})
 
-        const checkUser: any = await User.find({where: { email }});
+        // const checkUser: any = await User.find({where: { email }});
+        const checkUser: any = await Baserepository.findBy(User, ['id', 'email'], ['email', email])
+
         expect(checkUser.length).toEqual(1);
-        await redis.set(user.id)
+        await redis.set(checkUser[0].id)
 
-        const response: any = await graphql({schema, source: query(user.id), contextValue: {redis}});
+        const response: any = await graphql({schema, source: query(checkUser[0].id), contextValue: {redis}});
 
         expect(response.data.confirmEmail.status).toEqual('Success')
         expect(response.data.confirmEmail.message).toEqual('Email Verified')

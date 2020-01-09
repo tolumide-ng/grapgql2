@@ -14,7 +14,9 @@ class User extends Model {
 
   async $beforeUpdate(context: any){
       await super.$beforeUpdate(context);
-      this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
+      if(this.password){
+          this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(10))
+        }
   }
 
 

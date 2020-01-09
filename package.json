@@ -41,7 +41,7 @@
    },
    "scripts": {
       "start": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
-      "test": "NODE_ENV=test jest --forceExit",
+      "test": "NODE_ENV=test jest --detectOpenHandles --forceExit --collect-coverage",
       "gen-schema-types": "ts-node ./src/scripts/createType.ts",
       "typeorm": "ts-node ./node_modules/.bin/typeorm",
       "knex:migrate": "knex migrate:make"
