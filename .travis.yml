@@ -1,0 +1,23 @@
+
+language: node_js
+node_js:
+    - 'stable'
+dist: trusty
+cache:
+    directories:
+        - 'node_modules'
+services:
+    - postgresql
+env:
+    global:
+        - PGPORT=5432
+before_script:
+    - psql -c 'create database gq_ts;' -U postgres
+    - yarn install
+    - yarn global add knex
+    - knex migrate:latest
+    - yarn run migrate
+script:
+    - yarn test
+# after_success:
+#     - npm run coverage

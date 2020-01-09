@@ -58,10 +58,9 @@ describe.only('Test User registration', () => {
 
 
 
-    // running the test for each case in the cases array
 
-        test('should create a user', async () => {
-            const {email, password} = await genUser()
+        test.skip('should create a user', async () => {
+            const {email, password} = genUser()
             const previousUser = await Baserepository.findBy(User, ['email'], ['email', email])
             expect(previousUser.length).toBeLessThan(1)
 
@@ -102,7 +101,7 @@ describe.only('Test User registration', () => {
 
         test('should return error if validation error occurs', async () => {
             const email = 'ot'
-            const {password} = await genUser()
+            const {password} = genUser()
 
             const response:any = await graphql({schema, source: mutation(email, password), contextValue: {redis, url:'https://localhost:4000'}});
             expect(response.data.register.errorMessage).toEqual('email must be at least 5 characters');

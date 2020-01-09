@@ -6,3 +6,4 @@ tmp/
 temp/
 yarn.lock
 dump.rdb
+coverage/
