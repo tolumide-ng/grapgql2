@@ -1,11 +1,12 @@
 // Update with your config settings.
+require('dotenv').config()
 
 module.exports = {
   development: {
     client: 'postgresql',
     connection: {
         database: 'gq_ts',
-        user:     'tolumide',
+        user:     'postgres',
         password: '',
         host: 'localhost'
       },
